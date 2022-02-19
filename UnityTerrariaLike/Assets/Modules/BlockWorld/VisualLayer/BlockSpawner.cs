@@ -15,7 +15,6 @@ namespace elZach.TerrariaLike
 
         void Start()
         {
-            //fill the grid, how you already do
             Grid = new BlockGrid();
             Grid.InitRandom(worldSettings);
             Grid.onBlockDestroyed += OnBlockRemoved;
@@ -36,7 +35,7 @@ namespace elZach.TerrariaLike
                 if (!Grid.IsInsideGrid(x, y)) continue;
                 var data = grid[pos];
                 if (data.spawnedBlock) continue;    //if we already spawned the block, we can ignore it
-                var block = library.GetPrefab(data.block).Spawn();
+                var block = library.GetPrefab(data.block).Spawn(transform);
                 block.transform.position = new Vector3(x, y, 0f);
                 data.spawnedBlock = block;
                 inView.Add(pos);
