@@ -6,12 +6,12 @@ namespace elZach.TerrariaLike
     public class BlockSpawner : MonoBehaviour
     {
         public BlockGrid Grid;
-        Dictionary<(int x, int y), Block> grid => Grid.data;
+        Dictionary<Vector2Int, Block> grid => Grid.data;
         public BlockGrid.CreationSetting worldSettings;
         public Transform player;
         public Vector2Int playerExtents = new Vector2Int(20, 15);
         public BlockLibrary library;
-        public List<(int x, int y)> inView = new List<(int, int)>();
+        public List<Vector2Int> inView = new List<Vector2Int>();
 
         void Start()
         {
@@ -27,18 +27,19 @@ namespace elZach.TerrariaLike
         void Update()
         {
             var playerPos = new Vector2Int(Mathf.RoundToInt(player.position.x), Mathf.RoundToInt(player.position.y));
-            var removeList = new List<(int, int)>(inView);  //copy the list of inview
+            var removeList = new List<Vector2Int>(inView);  //copy the list of inview
             for (int x = -playerExtents.x + playerPos.x; x < playerExtents.x + playerPos.x; x++)
             for (int y = -playerExtents.y + playerPos.y; y < playerExtents.y + playerPos.y; y++)
             {
-                if (removeList.Contains((x, y))) removeList.Remove((x, y)); //we remove everything that is in view
+                var pos = new Vector2Int(x, y);
+                if (removeList.Contains(pos)) removeList.Remove(pos); //we remove everything that is in view
                 if (!Grid.IsInsideGrid(x, y)) continue;
-                var data = grid[(x, y)];
+                var data = grid[pos];
                 if (data.spawnedBlock) continue;    //if we already spawned the block, we can ignore it
                 var block = library.GetPrefab(data.block).Spawn();
                 block.transform.position = new Vector3(x, y, 0f);
                 data.spawnedBlock = block;
-                inView.Add((x,y));
+                inView.Add(pos);
             }
             // so now we instantiated everything in view - let's clean up what we probably don't see anymore
 
@@ -51,7 +52,7 @@ namespace elZach.TerrariaLike
             }
         }
 
-        void OnBlockRemoved((int x, int y) pos)
+        void OnBlockRemoved(Vector2Int pos)
         {
             inView.Remove(pos);
         }

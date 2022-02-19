@@ -25,13 +25,13 @@ namespace elZach.TerrariaLike
             public bool Evaluate(float x, float y) => Mathf.PerlinNoise( offset.x + x * scale, offset.y + y * scale) > threshold;
         }
         
-        public Dictionary<(int x, int y), Block> data;
+        public Dictionary<Vector2Int, Block> data;
 
-        public event Action<(int x, int y)> onBlockDestroyed;
+        public event Action<Vector2Int> onBlockDestroyed;
 
         public void InitRandom(CreationSetting settings)
         {
-            data = new Dictionary<(int x, int y), Block>();
+            data = new Dictionary<Vector2Int, Block>();
             for (int x = -settings.width; x < settings.width; x++)
             for (int y = -settings.height; y < settings.height; y++)
             {
@@ -49,12 +49,12 @@ namespace elZach.TerrariaLike
 
             void Destroy()
             {
-                var tuple = (x, y);
+                var tuple = new Vector2Int(x,y);
                 onBlockDestroyed?.Invoke(tuple);
                 data.Remove(tuple);
             }
             blockData.onDestroy += Destroy;
-            data.Add((x, y), blockData);
+            data.Add(new Vector2Int(x,y), blockData);
         }
 
         public void RemoveCircle(Vector2 position, float radius)
@@ -66,19 +66,20 @@ namespace elZach.TerrariaLike
             for (int y = min.y; y < max.y; y++)
             {
                 if (!IsInsideGrid(x, y)) continue;
-                if (Vector2.Distance(position, new Vector2(x, y)) <= radius) data[(x,y)].Destroy();
+                Vector2Int pos = new Vector2Int(x, y);
+                if (Vector2.Distance(position, pos) <= radius) data[pos].Destroy();
             }
         }
         
         public bool IsInsideGrid(int x, int y)
         {
-            return data.ContainsKey((x, y));
+            return data.ContainsKey(new Vector2Int(x,y));
         }
 
         public void RemoveBlock(int x, int y)
         {
             if (!IsInsideGrid(x, y)) return;
-            data[(x,y)].Destroy();
+            data[new Vector2Int(x,y)].Destroy();
         }
     }
 }
